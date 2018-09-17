@@ -2,8 +2,6 @@
 
 require 'csv'
 require 'optparse'
-#require 'parallel'
-#require File.join(File.dirname(__FILE__),'evidence.rb')
 
 def usage(options={})
 	puts
@@ -63,23 +61,14 @@ puts Time.now
 
 #	Given that I don't use all of the features of evidences, just use a hash.
 #	Its much faster to load and select anyway.
-
-#evidences = []
 evidences = {}
 
-#c = CSV.open(options[:evidence_file],'rb')
-#record_count = c.readlines.size		#	this is slow when file is huge ( 30 seconds / 5 million )
-#c.close
 record_count = `wc -l #{options[:evidence_file]}`.split()[0].to_i
 
 (c=CSV.open(options[:evidence_file],'rb',
 		{ headers: true, col_sep: "\t" })).each do |line|
 
 	puts "#{Time.now} : Processing record #{c.lineno}/#{record_count} : #{line['Modified sequence']} : #{line['Leading razor protein']}"
-
-	#puts ['Modified sequence','Experiment','Intensity'].collect{|f| line[f] }.join(",")
-
-#	evidences.push Evidence.new(line.to_hash)
 
 	evidences[line['Modified sequence']] ||={}
 	evidences[line['Modified sequence']][line['Experiment']] ||= []
@@ -88,12 +77,8 @@ record_count = `wc -l #{options[:evidence_file]}`.split()[0].to_i
 end	#	(c=CSV.open(options[:evidence_file],'rb',
 
 puts "Generating experiment list."
-#experiments = evidences.collect{|e| e.experiment }.sort.uniq
 
 experiments = evidences.keys.collect{|s|evidences[s].keys}.flatten.sort.uniq
-#puts experiments
-
-
 
 puts "Writing MatchedModificationWithIntensitySums.txt ..."
 
@@ -102,9 +87,6 @@ c = CSV.open("MatchedModification.txt",'rb',{col_sep: "\t" })
 matched_modification_header = c.readline
 c.close
 
-#c = CSV.open("MatchedModification.txt",'rb',{col_sep: "\t" })
-#record_count = c.readlines.size
-#c.close
 record_count = `wc -l MatchedModification.txt`.split()[0].to_i
 
 matched_mod = CSV.open("MatchedModificationWithIntensitySums.txt",'w', {col_sep: "\t" })
@@ -128,14 +110,8 @@ matched_mod.puts matched_mod_header
 
 		#	with "select" use {/} and NOT do/end
 
-		#matches = evidences.select { |e| 
-		#	e.sequence == line['Modified sequence'] && e.experiment == exp
-		#}
-		#matches = evidences[line['Modified sequence']][exp] || []
-
 		puts "Found #{intensities.length} match intensities. Summing ..."
 
-		#matched_mod_line << matches.collect {|e| e.intensity.to_i }.inject(:+) || 0 )
 		matched_mod_line << ( intensities.inject(:+) || 0 )
 
 	end	#	experiments.each do |exp|
