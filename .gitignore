@@ -1,5 +1,6 @@
 
 Makefile
 
-/meddling
-/modification_locator
+/meddling/
+/modification_locator/
+/attach_intensities/
