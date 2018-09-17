@@ -1,1 +1,1 @@
-# protein_modification_locator
+# Protein Modification Locator
